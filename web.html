@@ -185,14 +185,12 @@ let isPaused = false;
 const frog = document.getElementById('frogPic');
 const modal = document.getElementById('customModal');
 
-/* Close modal when clicking outside content */
 modal.addEventListener('click', (e) => {
   if(e.target === modal) {
     modal.style.display = 'none';
   }
 });
 
-/* Timer functions */
 function openCustomTimer() {
   modal.style.display = 'flex';
 }
@@ -236,20 +234,16 @@ function startTimer() {
 
 function pauseTimer() { isPaused = true; }
 function rewindTimer() { remainingTime = totalTime; startTimer(); }
-
-/* RESET RIGHT HERE */
 function resetTimer(){
   clearInterval(countdown);
   remainingTime = 0;
   document.getElementById('display').innerText = "00:00:00";
 }
 
-/* Image swaps */
 function setDefault(){ frog.src='fro.png'; frog.className='rotated'; }
 function setShort(){ frog.src='ro.png'; frog.className=''; }
-function setLong(){ frog.src='Magical Toad.png'; frog.className=''; }
+function setLong(){ frog.src='mg.png'; frog.className=''; }
 
-/* About Developer */
 function aboutDev(){
   alert(`
 Hi there!
@@ -265,7 +259,7 @@ If you have any questions or feedback, feel free to email me at seiriaaa97@gmail
 Thank you for taking the time to read this message. I hope you have a wonderful day!
 
 Respectfully
-The Devloper
+The Developer
   `);
 }
 </script>
