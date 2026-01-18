@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Timer</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", sans-serif;
+    background-color: #d7f8d5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .marquee-wrapper {
+    width: 100%;
+    overflow: hidden;
+    background: #a0e0a0;
+    padding: 15px 0;
+    box-sizing: border-box;
+  }
+  .marquee {
+    display: inline-block;
+    white-space: nowrap;
+    animation: moveText 15s linear infinite;
+    font-size: 20px;
+    font-weight: bold;
+    color: #2e662e;
+    line-height: 1.2;
+  }
+  @keyframes moveText {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .top-capsules {
+    display: flex;
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .top-capsules button {
+    padding: 18px 28px;
+    border-radius: 50px;
+    border: none;
+    background: #6b8e23;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .top-capsules button:hover {
+    background: #556b2f;
+  }
+
+  .middle-image {
+    margin-top: 40px;
+  }
+  .middle-image img {
+    width: 370px;
+    height: auto;
+    transition: 0.2s;
+  }
+
+  .rotated {
+    transform: rotate(15deg);
+  }
+
+  .timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+  #display {
+    font-size: 80px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .bottom-controls {
+    display: flex;
+    gap: 25px;
+  }
+  .bottom-controls button {
+    padding: 12px 22px;
+    border-radius: 50px;
+    border: none;
+    font-size: 18px;
+    background: #4f9151;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .bottom-controls button:hover {
+    background: #3e7641;
+  }
+
+  /* Custom Timer Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background: #f0fff0;
+    padding: 20px 30px;
+    border-radius: 15px;
+    text-align: center;
+    color: #4f774f;
+  }
+  .modal-content input {
+    width: 80px;
+    padding: 8px 12px;
+    margin: 5px;
+    border-radius: 10px;
+    border: 1px solid #8aa17a;
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+  }
+  .modal-content button {
+    margin-top: 10px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: none;
+    background: #6b8e23;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <div class="marquee-wrapper">
+    <div class="marquee">“Focus, manage your time wisely, and watch your productivity soar!”</div>
+  </div>
+
+  <div class="top-capsules">
+    <button onclick="openCustomTimer()">Custom Timer</button>
+    <button onclick="setPreset(5); setShort()">Short Break</button>
+    <button onclick="setPreset(15); setLong()">Long Break</button>
+    <button onclick="aboutDev()">About the Dev</button>
+  </div>
+
+  <div class="middle-image">
+    <img id="frogPic" class="rotated" src="fro.png" alt="Study Image">
+  </div>
+
+  <div class="timer-container">
+    <div id="display">00:00:00</div>
+    <div class="bottom-controls">
+      <button onclick="rewindTimer()">Rewind</button>
+      <button onclick="startTimer()">Start</button>
+      <button onclick="pauseTimer()">Pause</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="modal" id="customModal">
+    <div class="modal-content">
+      <h3>Set Custom Timer</h3>
+      <input type="number" id="customMinutes" placeholder="Minutes" min="0"><br>
+      <input type="number" id="shortBreaks" placeholder="Short Breaks (5 min)" min="0">
+      <input type="number" id="longBreaks" placeholder="Long Breaks (15 min)" min="0"><br>
+      <button onclick="saveCustomTimer()">Start Timer</button>
+    </div>
+  </div>
+
+<script>
+let countdown;
+let totalTime = 0;
+let remainingTime = 0;
+let isPaused = false;
+const frog = document.getElementById('frogPic');
+const modal = document.getElementById('customModal');
+
+modal.addEventListener('click', (e) => {
+  if(e.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+
+function openCustomTimer() {
+  modal.style.display = 'flex';
+}
+
+function saveCustomTimer() {
+  let mins = parseInt(document.getElementById('customMinutes').value) || 0;
+  let shortB = parseInt(document.getElementById('shortBreaks').value) || 0;
+  let longB = parseInt(document.getElementById('longBreaks').value) || 0;
+  totalTime = remainingTime = mins*60 + shortB*5*60 + longB*15*60;
+  modal.style.display = 'none';
+  setDefault();
+  startTimer();
+}
+
+function setPreset(mins) {
+  totalTime = remainingTime = mins*60;
+  startTimer();
+}
+
+function startTimer() {
+  if (remainingTime <= 0) return;
+  clearInterval(countdown);
+  isPaused = false;
+  countdown = setInterval(() => {
+    if (!isPaused) {
+      let hh = Math.floor(remainingTime/3600);
+      let mm = Math.floor((remainingTime % 3600)/60);
+      let ss = remainingTime % 60;
+      document.getElementById('display').innerText =
+        (hh<10?"0":"") + hh + ":" +
+        (mm<10?"0":"") + mm + ":" +
+        (ss<10?"0":"") + ss;
+      remainingTime--;
+      if(remainingTime < 0){
+        clearInterval(countdown);
+        document.getElementById('display').innerText = "Time Up!!";
+      }
+    }
+  }, 1000);
+}
+
+function pauseTimer() { isPaused = true; }
+function rewindTimer() { remainingTime = totalTime; startTimer(); }
+function resetTimer(){
+  clearInterval(countdown);
+  remainingTime = 0;
+  document.getElementById('display').innerText = "00:00:00";
+}
+
+function setDefault(){ frog.src='fro.png'; frog.className='rotated'; }
+function setShort(){ frog.src='ro.png'; frog.className=''; }
+function setLong(){ frog.src='mg.png'; frog.className=''; }
+
+function aboutDev(){
+  alert(`
+Hi there!
+
+My name is Seiria, and I’m a high school student in the final months of 12th grade (2026). I study Computer Science at Gandaki Boarding School in Pokhara, Nepal. This is my first public website, built thanks to all the skills my computer teacher has taught me.
+
+Focusing on one task for more than 25–30 minutes has always been a challenge for me. Using timers has made my life so much easier. Studying with these timers helps my brain think that I will get a reward after each study session, which has helped me develop a consistent study habit.
+
+Inspired by timer videos on YouTube and other websites, I thought: why not make my own? That question led to the creation of this website, the Froogy Timer.
+
+If you have any questions or feedback, feel free to email me at seiriaaa97@gmail.com
+
+Thank you for taking the time to read this message. I hope you have a wonderful day!
+
+Respectfully
+The Developer
+  `);
+}
+</script>
+
+</body>
+</html>
