@@ -102,7 +102,6 @@
     background: #3e7641;
   }
 
-  /* Custom Timer Modal */
   .modal {
     display: none;
     position: fixed;
@@ -177,13 +176,18 @@
     </div>
   </div>
 
+  <!-- 🔊 TIMER END SOUND -->
+  <audio id="endSound" src="fail-2-demo-306647.mp3" preload="auto"></audio>
+
 <script>
 let countdown;
 let totalTime = 0;
 let remainingTime = 0;
 let isPaused = false;
+
 const frog = document.getElementById('frogPic');
 const modal = document.getElementById('customModal');
+const endSound = document.getElementById('endSound');
 
 modal.addEventListener('click', (e) => {
   if(e.target === modal) {
@@ -214,19 +218,25 @@ function startTimer() {
   if (remainingTime <= 0) return;
   clearInterval(countdown);
   isPaused = false;
+
   countdown = setInterval(() => {
     if (!isPaused) {
       let hh = Math.floor(remainingTime/3600);
       let mm = Math.floor((remainingTime % 3600)/60);
       let ss = remainingTime % 60;
+
       document.getElementById('display').innerText =
         (hh<10?"0":"") + hh + ":" +
         (mm<10?"0":"") + mm + ":" +
         (ss<10?"0":"") + ss;
+
       remainingTime--;
-      if(remainingTime < 0){
+
+      if (remainingTime < 0) {
         clearInterval(countdown);
         document.getElementById('display').innerText = "Time Up!!";
+        endSound.currentTime = 0;
+        endSound.play();
       }
     }
   }, 1000);
@@ -234,10 +244,13 @@ function startTimer() {
 
 function pauseTimer() { isPaused = true; }
 function rewindTimer() { remainingTime = totalTime; startTimer(); }
+
 function resetTimer(){
   clearInterval(countdown);
   remainingTime = 0;
   document.getElementById('display').innerText = "00:00:00";
+  endSound.pause();
+  endSound.currentTime = 0;
 }
 
 function setDefault(){ frog.src='fro.png'; frog.className='rotated'; }
@@ -266,5 +279,3 @@ The Developer
 
 </body>
 </html>
-
-
