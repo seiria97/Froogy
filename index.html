@@ -137,8 +137,58 @@
     font-size: 16px;
     cursor: pointer;
   }
+
+  /* ===== ADDED ONLY ===== */
+  body.blue-theme {
+    background-image: url("download.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  body.blue-theme .marquee-wrapper {
+    background-color: #b7d9f2;
+  }
+
+  body.blue-theme .marquee {
+    color: #00356b;
+  }
+
+  body.blue-theme .top-capsules button,
+  body.blue-theme .bottom-controls button,
+  body.blue-theme .modal-content button {
+    background-color: #00356b;
+    color: #f5f0dc;
+  }
+
+  body.blue-theme .top-capsules button:hover,
+  body.blue-theme .bottom-controls button:hover,
+  body.blue-theme .modal-content button:hover {
+    background-color: #00264d;
+  }
+
+  body.blue-theme #display {
+    color: #00356b;
+  }
+/* ===== ADDED: BLUE THEME MODAL ===== */
+body.blue-theme .modal-content {
+  background-color: #e6f2fb; /* pastel blue */
+  color: #00356b; /* yale blue */
+}
+
+body.blue-theme .modal-content input {
+  border: 1px solid #7fb3dd;
+  background-color: #f4f9fd;
+  color: #00356b;
+}
+
+body.blue-theme .modal-content input::placeholder {
+  color: #5a86a8;
+}
+
 </style>
 </head>
+
 <body>
 
   <div class="marquee-wrapper">
@@ -150,6 +200,7 @@
     <button onclick="setPreset(5); setShort()">Short Break</button>
     <button onclick="setPreset(15); setLong()">Long Break</button>
     <button onclick="aboutDev()">About the Dev</button>
+    <button onclick="toggleTheme()">Penguin Theme</button>
   </div>
 
   <div class="middle-image">
@@ -176,7 +227,6 @@
     </div>
   </div>
 
-  <!-- 🔊 TIMER END SOUND -->
   <audio id="endSound" src="fail-2-demo-306647.mp3" preload="auto"></audio>
 
 <script>
@@ -256,6 +306,71 @@ function resetTimer(){
 function setDefault(){ frog.src='fro.png'; frog.className='rotated'; }
 function setShort(){ frog.src='ro.png'; frog.className=''; }
 function setLong(){ frog.src='mg.png'; frog.className=''; }
+
+// update middle image according to theme and break type
+function updateBlueThemeImage(type) {
+  if (!document.body.classList.contains("blue-theme")) return;
+
+  if(type === "default") {
+    frog.src = "peng.png";
+    frog.className = ""; // no rotation
+  } else if(type === "short") {
+    frog.src = "pen.png";
+    frog.className = "";
+  } else if(type === "long") {
+    frog.src = "pengu.png";
+    frog.className = "";
+  }
+}
+
+// override setDefault, setShort, setLong to work with blue theme
+const oldSetDefault = setDefault;
+const oldSetShort = setShort;
+const oldSetLong = setLong;
+
+setDefault = function() {
+  if(document.body.classList.contains("blue-theme")) {
+    updateBlueThemeImage("default");
+  } else {
+    oldSetDefault();
+  }
+};
+
+setShort = function() {
+  if(document.body.classList.contains("blue-theme")) {
+    updateBlueThemeImage("short");
+  } else {
+    oldSetShort();
+  }
+};
+
+setLong = function() {
+  if(document.body.classList.contains("blue-theme")) {
+    updateBlueThemeImage("long");
+  } else {
+    oldSetLong();
+  }
+};
+
+//  change theme button also updates the middle image immediately
+function toggleTheme() {
+  // toggle theme class
+  document.body.classList.toggle("blue-theme");
+
+  // reset timer
+  clearInterval(countdown);
+  remainingTime = 0;
+  document.getElementById('display').innerText = "00:00:00";
+  endSound.pause();
+  endSound.currentTime = 0;
+
+  // update middle image according to theme
+  if(document.body.classList.contains("blue-theme")) {
+    updateBlueThemeImage("default"); // shows peng.png
+  } else {
+    setDefault(); // revert to original frog theme
+  }
+}
 
 function aboutDev(){
   alert(`
